@@ -1,0 +1,1419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NLP4RE — Natural Language Processing for Requirements Engineering</title>
+  <style>
+    /* ===== Reset & Base ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f5f0e8;
+      --bg-alt: #eee8da;
+      --orange: #d4782f;
+      --orange-light: #e8a86b;
+      --teal: #2a8c7a;
+      --teal-dark: #1e6b5c;
+      --charcoal: #2d3436;
+      --gray: #636e72;
+      --light-gray: #b2bec3;
+      --white: #fefefe;
+      --card-bg: #faf6ef;
+    }
+
+    html { scroll-behavior: smooth; font-size: 18px; }
+
+    body {
+      font-family: 'Georgia', 'Times New Roman', serif;
+      background: var(--bg);
+      color: var(--charcoal);
+      line-height: 1.7;
+    }
+
+    h1, h2, h3, h4 {
+      font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.2;
+    }
+
+    a { color: var(--teal); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ===== Navigation ===== */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(45, 52, 54, 0.95);
+      backdrop-filter: blur(10px);
+      z-index: 100;
+      padding: 0.6rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    nav .logo {
+      color: var(--orange);
+      font-family: 'Segoe UI', sans-serif;
+      font-weight: 700;
+      font-size: 1.1rem;
+      letter-spacing: 1px;
+    }
+
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    nav ul li a {
+      color: #ddd;
+      font-family: 'Segoe UI', sans-serif;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      transition: color 0.2s;
+    }
+
+    nav ul li a:hover { color: var(--orange); text-decoration: none; }
+
+    /* ===== Sections ===== */
+    section {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6rem 2rem 4rem;
+    }
+
+    .container {
+      max-width: 1100px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    /* ===== Hero ===== */
+    #hero {
+      background: linear-gradient(135deg, var(--charcoal) 0%, #3d4a4c 100%);
+      color: var(--white);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 40px,
+        rgba(212, 120, 47, 0.03) 40px,
+        rgba(212, 120, 47, 0.03) 80px
+      );
+    }
+
+    #hero .container { position: relative; z-index: 1; }
+
+    #hero h1 {
+      font-size: 3.2rem;
+      margin-bottom: 0.5rem;
+      font-weight: 700;
+    }
+
+    #hero h1 span { color: var(--orange); }
+
+    #hero .subtitle {
+      font-size: 1.4rem;
+      color: var(--light-gray);
+      font-style: italic;
+      margin-bottom: 2rem;
+    }
+
+    .meta {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      flex-wrap: wrap;
+      font-size: 0.85rem;
+      color: var(--light-gray);
+    }
+
+    .meta-item {
+      background: rgba(255,255,255,0.08);
+      padding: 0.5rem 1.2rem;
+      border-radius: 6px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .hero-stats {
+      display: flex;
+      justify-content: center;
+      gap: 3rem;
+      margin-top: 3rem;
+      flex-wrap: wrap;
+    }
+
+    .hero-stat {
+      text-align: center;
+    }
+
+    .hero-stat .number {
+      font-size: 2.8rem;
+      font-weight: 700;
+      color: var(--orange);
+      display: block;
+    }
+
+    .hero-stat .label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--light-gray);
+    }
+
+    /* ===== Section Headers ===== */
+    .section-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .section-header h2 {
+      font-size: 2.4rem;
+      color: var(--charcoal);
+      margin-bottom: 0.5rem;
+    }
+
+    .section-header p {
+      color: var(--gray);
+      font-size: 1.05rem;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .accent { color: var(--orange); }
+    .accent-teal { color: var(--teal); }
+
+    /* ===== Imperative Section ===== */
+    #imperative { background: var(--bg); }
+
+    .imperative-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: center;
+    }
+
+    .big-stat {
+      font-size: 8rem;
+      font-weight: 900;
+      color: var(--orange);
+      line-height: 1;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .big-stat-label {
+      font-size: 1.1rem;
+      color: var(--gray);
+      margin-top: 0.5rem;
+    }
+
+    .imperative-points {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .imp-point {
+      padding: 1.2rem 1.5rem;
+      background: var(--card-bg);
+      border-left: 4px solid var(--teal);
+      border-radius: 0 8px 8px 0;
+    }
+
+    .imp-point h3 {
+      color: var(--teal);
+      font-size: 1rem;
+      margin-bottom: 0.3rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .imp-point p {
+      font-size: 1rem;
+      color: var(--charcoal);
+    }
+
+    .imp-point.orange { border-left-color: var(--orange); }
+    .imp-point.orange h3 { color: var(--orange); }
+
+    /* ===== Mission / RQs ===== */
+    #mission { background: var(--bg-alt); }
+
+    .rq-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .rq-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 1.8rem;
+      border-top: 4px solid var(--teal);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .rq-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+    }
+
+    .rq-card .rq-label {
+      font-family: 'Segoe UI', sans-serif;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--teal);
+      margin-bottom: 0.5rem;
+    }
+
+    .rq-card h3 { font-size: 1.15rem; margin-bottom: 0.5rem; }
+
+    .rq-card p { font-size: 0.9rem; color: var(--gray); }
+
+    .rq-card:nth-child(even) { border-top-color: var(--orange); }
+    .rq-card:nth-child(even) .rq-label { color: var(--orange); }
+
+    /* ===== Timeline Section ===== */
+    #timeline { background: var(--bg); }
+
+    .timeline-visual {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    .chart-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      height: 280px;
+      padding: 1rem 0;
+      width: 100%;
+      max-width: 900px;
+    }
+
+    .chart-bar {
+      flex: 1;
+      background: var(--teal);
+      border-radius: 3px 3px 0 0;
+      min-width: 8px;
+      position: relative;
+      transition: background 0.3s;
+    }
+
+    .chart-bar:hover { background: var(--teal-dark); }
+    .chart-bar.highlight { background: var(--orange); }
+
+    .chart-labels {
+      display: flex;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 900px;
+      font-size: 0.75rem;
+      color: var(--gray);
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .inflection-note {
+      display: inline-block;
+      background: var(--card-bg);
+      border: 1px solid var(--light-gray);
+      padding: 0.6rem 1.2rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      color: var(--gray);
+      margin-top: 1rem;
+    }
+
+    .inflection-note strong { color: var(--charcoal); }
+
+    /* ===== Empirical Validation ===== */
+    #validation { background: var(--bg-alt); }
+
+    .validation-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+      text-align: center;
+    }
+
+    .val-card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 2.5rem 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .val-circle {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      margin: 0 auto 1.5rem;
+    }
+
+    .val-circle.large {
+      background: var(--orange);
+      color: white;
+      width: 160px;
+      height: 160px;
+    }
+
+    .val-circle.medium {
+      background: var(--teal);
+      color: white;
+    }
+
+    .val-circle.small {
+      background: var(--gray);
+      color: white;
+      width: 110px;
+      height: 110px;
+    }
+
+    .val-circle .pct {
+      font-size: 2.4rem;
+      font-weight: 700;
+      font-family: 'Segoe UI', sans-serif;
+      line-height: 1;
+    }
+
+    .val-circle .pct-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 0.3rem;
+    }
+
+    .val-card h3 {
+      font-size: 1.1rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .val-card p {
+      font-size: 0.85rem;
+      color: var(--gray);
+    }
+
+    .val-insight {
+      grid-column: 1 / -1;
+      background: var(--charcoal);
+      color: var(--white);
+      border-radius: 12px;
+      padding: 1.5rem 2rem;
+      font-size: 1.1rem;
+      font-style: italic;
+      text-align: center;
+    }
+
+    /* ===== RE Phases ===== */
+    #phases { background: var(--bg); }
+
+    .phase-pipeline {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      flex-wrap: wrap;
+      margin: 2rem 0;
+    }
+
+    .phase-box {
+      padding: 1.2rem 2rem;
+      font-family: 'Segoe UI', sans-serif;
+      font-weight: 600;
+      font-size: 0.95rem;
+      border-radius: 8px;
+      text-align: center;
+      color: white;
+      background: var(--charcoal);
+      position: relative;
+    }
+
+    .phase-box.active {
+      background: var(--orange);
+      transform: scale(1.2);
+      z-index: 2;
+      padding: 1.6rem 2.5rem;
+      font-size: 1.2rem;
+      box-shadow: 0 8px 30px rgba(212, 120, 47, 0.3);
+    }
+
+    .phase-arrow {
+      width: 40px;
+      text-align: center;
+      color: var(--light-gray);
+      font-size: 1.5rem;
+    }
+
+    /* ===== Capabilities ===== */
+    #capabilities { background: var(--bg-alt); }
+
+    .cap-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+
+    .cap-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 2rem;
+      text-align: center;
+      border: 2px solid transparent;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .cap-card:hover {
+      border-color: var(--teal);
+      transform: translateY(-3px);
+    }
+
+    .cap-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      display: block;
+    }
+
+    .cap-card h3 {
+      font-size: 1.15rem;
+      margin-bottom: 0.5rem;
+      color: var(--teal);
+    }
+
+    .cap-card p {
+      font-size: 0.9rem;
+      color: var(--gray);
+    }
+
+    .cap-card.muted {
+      opacity: 0.55;
+      border: 2px dashed var(--light-gray);
+    }
+
+    /* ===== Alignment Bubble Chart ===== */
+    #alignment { background: var(--bg); }
+
+    .bubble-table {
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+      border-collapse: collapse;
+    }
+
+    .bubble-table th {
+      font-family: 'Segoe UI', sans-serif;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--gray);
+      padding: 0.8rem;
+      text-align: center;
+      border-bottom: 2px solid var(--light-gray);
+    }
+
+    .bubble-table th:first-child { text-align: left; }
+
+    .bubble-table td {
+      padding: 1rem;
+      text-align: center;
+      vertical-align: middle;
+    }
+
+    .bubble-table td:first-child {
+      text-align: left;
+      font-weight: 600;
+      font-family: 'Segoe UI', sans-serif;
+      color: var(--charcoal);
+    }
+
+    .bubble {
+      display: inline-block;
+      border-radius: 50%;
+      background: var(--orange);
+    }
+
+    .bubble.xl { width: 80px; height: 80px; }
+    .bubble.lg { width: 55px; height: 55px; }
+    .bubble.md { width: 40px; height: 40px; }
+    .bubble.sm { width: 28px; height: 28px; }
+
+    /* ===== Input Data ===== */
+    #data { background: var(--bg-alt); }
+
+    .funnel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .funnel-item {
+      padding: 1.2rem 2rem;
+      text-align: center;
+      font-family: 'Segoe UI', sans-serif;
+      font-weight: 600;
+      color: white;
+      position: relative;
+      width: var(--funnel-width, 100%);
+      clip-path: polygon(5% 0%, 95% 0%, 100% 100%, 0% 100%);
+    }
+
+    .funnel-item:nth-child(1) { background: var(--teal); --funnel-width: 100%; font-size: 1.1rem; }
+    .funnel-item:nth-child(2) { background: var(--teal-dark); --funnel-width: 85%; font-size: 1rem; }
+    .funnel-item:nth-child(3) { background: var(--orange); --funnel-width: 68%; font-size: 0.9rem; }
+    .funnel-item:nth-child(4) { background: var(--orange-light); --funnel-width: 50%; font-size: 0.85rem; }
+    .funnel-item:nth-child(5) { background: var(--gray); --funnel-width: 32%; font-size: 0.8rem; color: #eee; }
+
+    .funnel-note {
+      margin-top: 1.5rem;
+      padding: 1rem 1.5rem;
+      background: var(--card-bg);
+      border: 2px solid var(--orange);
+      border-radius: 8px;
+      font-size: 0.9rem;
+      color: var(--gray);
+      text-align: center;
+      max-width: 400px;
+    }
+
+    /* ===== Tooling ===== */
+    #tooling { background: var(--bg); }
+
+    .tooling-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: center;
+    }
+
+    .tech-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .stack-layer {
+      padding: 1.8rem 2rem;
+      color: white;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .stack-layer h4 { font-size: 1rem; margin-bottom: 0.3rem; }
+    .stack-layer p { font-size: 0.85rem; opacity: 0.85; }
+
+    .stack-layer.top { background: var(--orange-light); padding: 1.2rem 2rem; }
+    .stack-layer.mid { background: var(--teal); }
+    .stack-layer.base { background: var(--teal-dark); padding: 2.5rem 2rem; }
+
+    .tooling-stats { text-align: center; }
+
+    .tooling-stats .big-number {
+      font-size: 5rem;
+      font-weight: 900;
+      font-family: 'Segoe UI', sans-serif;
+      color: var(--charcoal);
+      line-height: 1;
+    }
+
+    .tooling-stats .big-label {
+      font-size: 1.2rem;
+      color: var(--gray);
+      margin-bottom: 1.5rem;
+    }
+
+    .warning-badge {
+      display: inline-block;
+      background: #fff3e0;
+      border: 2px solid var(--orange);
+      color: var(--orange);
+      padding: 0.6rem 1.5rem;
+      border-radius: 30px;
+      font-family: 'Segoe UI', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+    }
+
+    /* ===== Verdict ===== */
+    #verdict { background: var(--bg-alt); }
+
+    .verdict-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    .verdict-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 2rem;
+    }
+
+    .verdict-card h3 {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--teal);
+      margin-bottom: 1rem;
+    }
+
+    .verdict-card .verdict-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      font-family: 'Segoe UI', sans-serif;
+      color: var(--charcoal);
+    }
+
+    .verdict-card .verdict-detail {
+      font-size: 0.9rem;
+      color: var(--gray);
+      margin-top: 0.5rem;
+    }
+
+    .gt-symbol {
+      color: var(--orange);
+      font-weight: 700;
+      margin: 0 0.3rem;
+    }
+
+    /* ===== Gaps ===== */
+    #gaps { background: var(--bg); }
+
+    .gaps-bridge {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 1rem;
+      margin: 2rem 0;
+      position: relative;
+    }
+
+    .bridge-side {
+      background: var(--teal);
+      color: white;
+      padding: 2rem 1.5rem;
+      border-radius: 12px 12px 0 0;
+      text-align: center;
+      font-family: 'Segoe UI', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      width: 160px;
+      min-height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .gap-items {
+      flex: 1;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.8rem;
+      padding-bottom: 1rem;
+    }
+
+    .gap-tag {
+      background: var(--card-bg);
+      border: 2px solid var(--orange);
+      color: var(--charcoal);
+      padding: 0.7rem 1.2rem;
+      border-radius: 8px;
+      font-family: 'Segoe UI', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    .bridge-chasm {
+      text-align: center;
+      font-style: italic;
+      color: var(--orange);
+      font-size: 1.1rem;
+      margin-top: 0.5rem;
+      font-weight: 600;
+    }
+
+    /* ===== Contributions ===== */
+    #contributions { background: var(--bg-alt); }
+
+    .contrib-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .contrib-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      background: var(--card-bg);
+      padding: 1.5rem;
+      border-radius: 12px;
+    }
+
+    .contrib-number {
+      font-family: 'Segoe UI', sans-serif;
+      font-size: 2rem;
+      font-weight: 900;
+      color: var(--orange);
+      line-height: 1;
+      min-width: 40px;
+    }
+
+    .contrib-item p { font-size: 0.95rem; color: var(--charcoal); }
+
+    /* ===== Path Forward ===== */
+    #path { background: var(--bg); }
+
+    .path-arrows {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      margin: 2rem 0;
+      flex-wrap: wrap;
+    }
+
+    .path-step {
+      padding: 1.8rem 2.5rem;
+      font-family: 'Segoe UI', sans-serif;
+      font-weight: 700;
+      font-size: 1.05rem;
+      text-align: center;
+      color: white;
+      position: relative;
+      clip-path: polygon(0% 0%, 85% 0%, 100% 50%, 85% 100%, 0% 100%, 15% 50%);
+      min-width: 220px;
+    }
+
+    .path-step:first-child {
+      clip-path: polygon(0% 0%, 85% 0%, 100% 50%, 85% 100%, 0% 100%);
+    }
+
+    .path-step.s1 { background: var(--light-gray); }
+    .path-step.s2 { background: var(--teal); }
+    .path-step.s3 { background: var(--orange); font-size: 1.15rem; }
+
+    .path-quote {
+      text-align: center;
+      font-size: 1.15rem;
+      font-style: italic;
+      color: var(--gray);
+      max-width: 700px;
+      margin: 2rem auto 0;
+      padding: 1.5rem;
+      border-top: 2px solid var(--light-gray);
+      border-bottom: 2px solid var(--light-gray);
+    }
+
+    /* ===== Closing ===== */
+    #closing {
+      background: var(--charcoal);
+      color: var(--white);
+      text-align: center;
+    }
+
+    #closing h2 {
+      font-size: 3.5rem;
+      font-weight: 900;
+      line-height: 1.3;
+      margin-bottom: 2rem;
+    }
+
+    #closing h2 span { display: block; }
+    #closing .closing-accent { color: var(--orange); }
+
+    #closing .closing-cite {
+      font-size: 1rem;
+      color: var(--light-gray);
+      font-style: italic;
+    }
+
+    /* ===== Footer ===== */
+    footer {
+      background: #1a1e1f;
+      color: var(--light-gray);
+      text-align: center;
+      padding: 2rem;
+      font-size: 0.8rem;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    footer a { color: var(--orange-light); }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 900px) {
+      html { font-size: 16px; }
+
+      nav ul { display: none; }
+
+      #hero h1 { font-size: 2.2rem; }
+
+      .imperative-grid,
+      .tooling-layout,
+      .verdict-grid,
+      .contrib-list { grid-template-columns: 1fr; }
+
+      .validation-grid { grid-template-columns: 1fr; }
+
+      .cap-grid { grid-template-columns: 1fr 1fr; }
+
+      .big-stat { font-size: 5rem; }
+
+      .phase-pipeline { gap: 0.5rem; }
+      .phase-box { padding: 0.8rem 1rem; font-size: 0.8rem; }
+      .phase-box.active { padding: 1rem 1.5rem; font-size: 1rem; }
+      .phase-arrow { width: 20px; font-size: 1rem; }
+
+      .gaps-bridge { flex-direction: column; align-items: center; }
+      .bridge-side { width: 100%; min-height: auto; border-radius: 12px; }
+
+      .path-step {
+        clip-path: none;
+        border-radius: 8px;
+        min-width: 100%;
+        margin-bottom: 0.5rem;
+      }
+      .path-step:first-child { clip-path: none; }
+
+      #closing h2 { font-size: 2.2rem; }
+    }
+
+    @media (max-width: 600px) {
+      .cap-grid { grid-template-columns: 1fr; }
+      .hero-stats { gap: 1.5rem; }
+      .rq-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== Navigation ===== -->
+<nav>
+  <div class="logo">NLP4RE</div>
+  <ul>
+    <li><a href="#hero">Home</a></li>
+    <li><a href="#imperative">Why</a></li>
+    <li><a href="#mission">Mission</a></li>
+    <li><a href="#timeline">Timeline</a></li>
+    <li><a href="#validation">Validation</a></li>
+    <li><a href="#capabilities">Capabilities</a></li>
+    <li><a href="#gaps">Gaps</a></li>
+    <li><a href="#path">Path Forward</a></li>
+  </ul>
+</nav>
+
+<!-- ===== Hero ===== -->
+<section id="hero">
+  <div class="container">
+    <h1>Natural Language Processing<br>for <span>Requirements Engineering</span></h1>
+    <p class="subtitle">A Systematic Mapping Study</p>
+    <div class="meta">
+      <span class="meta-item">ACM Computing Surveys, 2021</span>
+      <span class="meta-item">Liping Zhao et al.</span>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <span class="number">404</span>
+        <span class="label">Studies Analyzed</span>
+      </div>
+      <div class="hero-stat">
+        <span class="number">36</span>
+        <span class="label">Years Covered</span>
+      </div>
+      <div class="hero-stat">
+        <span class="number">1</span>
+        <span class="label">Unified Framework</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== The Imperative ===== -->
+<section id="imperative">
+  <div class="container">
+    <div class="imperative-grid">
+      <div>
+        <div class="big-stat">95%</div>
+        <p class="big-stat-label">of requirements are written in natural language</p>
+      </div>
+      <div class="imperative-points">
+        <div class="imp-point orange">
+          <h3>The Problem</h3>
+          <p>Manual analysis of natural language requirements is error-prone, time-consuming, and fails to scale.</p>
+        </div>
+        <div class="imp-point">
+          <h3>The Solution</h3>
+          <p>NLP4RE &mdash; applying Natural Language Processing techniques to automate requirements engineering tasks.</p>
+        </div>
+        <div class="imp-point">
+          <h3>The Goal</h3>
+          <p>Assist humans in processing requirements. Reduce ambiguity and improve quality.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== The Mission ===== -->
+<section id="mission">
+  <div class="container">
+    <div class="section-header">
+      <h2>The Mission: <span class="accent">Mapping the Field</span></h2>
+      <p>Analyzing the NLP4RE landscape to answer five critical research questions.</p>
+    </div>
+    <div class="rq-grid">
+      <div class="rq-card">
+        <div class="rq-label">RQ1</div>
+        <h3>Literature State</h3>
+        <p>What is the current state of the literature on NLP4RE research, and how has it evolved over time?</p>
+      </div>
+      <div class="rq-card">
+        <div class="rq-label">RQ2</div>
+        <h3>Empirical Research</h3>
+        <p>What types of research are being conducted &mdash; solution proposals, validation studies, or industrial evaluations?</p>
+      </div>
+      <div class="rq-card">
+        <div class="rq-label">RQ3</div>
+        <h3>Research Focus</h3>
+        <p>Which RE phases and NLP tasks are researchers targeting? Where are efforts concentrated?</p>
+      </div>
+      <div class="rq-card">
+        <div class="rq-label">RQ4</div>
+        <h3>Tool Development</h3>
+        <p>What tools have been developed, and how mature and publicly available are they?</p>
+      </div>
+      <div class="rq-card">
+        <div class="rq-label">RQ5</div>
+        <h3>NLP Technologies</h3>
+        <p>What NLP techniques are being applied, and how sophisticated is the technology stack?</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Timeline ===== -->
+<section id="timeline">
+  <div class="container">
+    <div class="section-header">
+      <h2>A 36-Year Timeline of <span class="accent">Explosive Growth</span></h2>
+      <p>Analyzing the surge in research output from 1983 to 2019.</p>
+    </div>
+    <div class="timeline-visual">
+      <div class="chart-bars">
+        <!-- 1983-2002: low activity (~20 years, small bars) -->
+        <div class="chart-bar" style="height: 2%;" title="1983"></div>
+        <div class="chart-bar" style="height: 2%;" title="1984"></div>
+        <div class="chart-bar" style="height: 1%;" title="1985"></div>
+        <div class="chart-bar" style="height: 2%;" title="1986"></div>
+        <div class="chart-bar" style="height: 1%;" title="1987"></div>
+        <div class="chart-bar" style="height: 2%;" title="1988"></div>
+        <div class="chart-bar" style="height: 2%;" title="1989"></div>
+        <div class="chart-bar" style="height: 1%;" title="1990"></div>
+        <div class="chart-bar" style="height: 3%;" title="1991"></div>
+        <div class="chart-bar" style="height: 2%;" title="1992"></div>
+        <div class="chart-bar" style="height: 3%;" title="1993"></div>
+        <div class="chart-bar" style="height: 3%;" title="1994"></div>
+        <div class="chart-bar" style="height: 2%;" title="1995"></div>
+        <div class="chart-bar" style="height: 4%;" title="1996"></div>
+        <div class="chart-bar" style="height: 3%;" title="1997"></div>
+        <div class="chart-bar" style="height: 4%;" title="1998"></div>
+        <div class="chart-bar" style="height: 3%;" title="1999"></div>
+        <div class="chart-bar" style="height: 5%;" title="2000"></div>
+        <div class="chart-bar" style="height: 4%;" title="2001"></div>
+        <div class="chart-bar" style="height: 5%;" title="2002"></div>
+        <!-- 2003 inflection point -->
+        <div class="chart-bar" style="height: 7%;" title="2003"></div>
+        <!-- 2004-2019: accelerating growth -->
+        <div class="chart-bar highlight" style="height: 10%;" title="2004"></div>
+        <div class="chart-bar highlight" style="height: 12%;" title="2005"></div>
+        <div class="chart-bar highlight" style="height: 14%;" title="2006"></div>
+        <div class="chart-bar highlight" style="height: 16%;" title="2007"></div>
+        <div class="chart-bar highlight" style="height: 18%;" title="2008"></div>
+        <div class="chart-bar highlight" style="height: 17%;" title="2009"></div>
+        <div class="chart-bar highlight" style="height: 22%;" title="2010"></div>
+        <div class="chart-bar highlight" style="height: 25%;" title="2011"></div>
+        <div class="chart-bar highlight" style="height: 28%;" title="2012"></div>
+        <div class="chart-bar highlight" style="height: 32%;" title="2013"></div>
+        <div class="chart-bar highlight" style="height: 38%;" title="2014"></div>
+        <div class="chart-bar highlight" style="height: 45%;" title="2015"></div>
+        <div class="chart-bar highlight" style="height: 55%;" title="2016"></div>
+        <div class="chart-bar highlight" style="height: 65%;" title="2017"></div>
+        <div class="chart-bar highlight" style="height: 80%;" title="2018"></div>
+        <div class="chart-bar highlight" style="height: 100%;" title="2019"></div>
+      </div>
+      <div class="chart-labels">
+        <span>1983</span>
+        <span>1988</span>
+        <span>1993</span>
+        <span>1998</span>
+        <span>2003</span>
+        <span>2008</span>
+        <span>2013</span>
+        <span>2019</span>
+      </div>
+      <div class="inflection-note">
+        <strong>Inflection Point ~2003:</strong> Research output began accelerating dramatically, culminating in <strong>404 studies</strong> by 2019.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Empirical Validation ===== -->
+<section id="validation">
+  <div class="container">
+    <div class="section-header">
+      <h2>High Innovation, <span class="accent">Low Empirical Validation</span></h2>
+      <p>The field is inventing techniques but rarely testing them in the wild.</p>
+    </div>
+    <div class="validation-grid">
+      <div class="val-card">
+        <div class="val-circle large">
+          <span class="pct">67%</span>
+          <span class="pct-label">of studies</span>
+        </div>
+        <h3>Solution Proposals</h3>
+        <p>The majority of research proposes new techniques without rigorous evaluation.</p>
+      </div>
+      <div class="val-card">
+        <div class="val-circle medium">
+          <span class="pct">17%</span>
+          <span class="pct-label">of studies</span>
+        </div>
+        <h3>Validation Research</h3>
+        <p>Only a fraction of studies include controlled experimental validation.</p>
+      </div>
+      <div class="val-card">
+        <div class="val-circle small">
+          <span class="pct">7%</span>
+          <span class="pct-label">of studies</span>
+        </div>
+        <h3>Industrial Evaluation</h3>
+        <p>Very few approaches are tested in real-world industrial settings.</p>
+      </div>
+      <div class="val-insight">
+        &ldquo;We are inventing techniques but rarely testing them in the wild.&rdquo;
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== RE Phases ===== -->
+<section id="phases">
+  <div class="container">
+    <div class="section-header">
+      <h2>Targeting the <span class="accent">Requirements Analysis</span> Phase</h2>
+      <p>Where NLP efforts are concentrated across the requirements engineering lifecycle.</p>
+    </div>
+    <div class="phase-pipeline">
+      <div class="phase-box">Elicitation</div>
+      <div class="phase-arrow">&rarr;</div>
+      <div class="phase-box active">Analysis</div>
+      <div class="phase-arrow">&rarr;</div>
+      <div class="phase-box">Design</div>
+      <div class="phase-arrow">&rarr;</div>
+      <div class="phase-box">Implementation</div>
+      <div class="phase-arrow">&rarr;</div>
+      <div class="phase-box">Testing</div>
+    </div>
+    <p style="text-align:center; color: var(--gray); font-size: 0.95rem; margin-top: 1rem;">
+      The <strong>Analysis</strong> phase dominates NLP4RE research, with significantly less work targeting other RE phases.
+    </p>
+  </div>
+</section>
+
+<!-- ===== Functional Capabilities ===== -->
+<section id="capabilities">
+  <div class="container">
+    <div class="section-header">
+      <h2>The Functional Capabilities of <span class="accent-teal">NLP4RE</span></h2>
+      <p>Six core functional areas where NLP is applied to requirements engineering.</p>
+    </div>
+    <div class="cap-grid">
+      <div class="cap-card">
+        <span class="cap-icon">&#128269;</span>
+        <h3>Detection</h3>
+        <p>Identifying entities and patterns within requirements documents.</p>
+      </div>
+      <div class="cap-card">
+        <span class="cap-icon">&#128218;</span>
+        <h3>Classification</h3>
+        <p>Categorizing information automatically into predefined classes.</p>
+      </div>
+      <div class="cap-card">
+        <span class="cap-icon">&#128295;</span>
+        <h3>Extraction</h3>
+        <p>Pulling structured data from unstructured natural language text.</p>
+      </div>
+      <div class="cap-card">
+        <span class="cap-icon">&#128300;</span>
+        <h3>Modeling</h3>
+        <p>Representing knowledge and relationships in formal structures.</p>
+      </div>
+      <div class="cap-card">
+        <span class="cap-icon">&#128279;</span>
+        <h3>Traceability</h3>
+        <p>Linking requirements to downstream artifacts and implementation.</p>
+      </div>
+      <div class="cap-card muted">
+        <span class="cap-icon">&#128270;</span>
+        <h3>Search &amp; Retrieval</h3>
+        <p>Finding relevant information across requirements repositories.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Alignment ===== -->
+<section id="alignment">
+  <div class="container">
+    <div class="section-header">
+      <h2>Aligning <span class="accent">Linguistic Tasks</span> with Engineering Phases</h2>
+      <p>How NLP tasks map to requirements engineering phases, showing where research effort is concentrated.</p>
+    </div>
+    <table class="bubble-table">
+      <thead>
+        <tr>
+          <th>RE Phase</th>
+          <th>Detection</th>
+          <th>Extraction</th>
+          <th>Traceability</th>
+          <th>Concept Modeling</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Analysis</td>
+          <td><span class="bubble xl"></span></td>
+          <td></td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>Elicitation</td>
+          <td></td>
+          <td><span class="bubble md"></span></td>
+          <td></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>Management</td>
+          <td></td>
+          <td></td>
+          <td><span class="bubble lg"></span></td>
+          <td></td>
+        </tr>
+        <tr>
+          <td>Modeling</td>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td><span class="bubble lg"></span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ===== Input Data ===== -->
+<section id="data">
+  <div class="container">
+    <div class="section-header">
+      <h2>Input Data: The Dominance of <span class="accent">Specifications</span></h2>
+      <p>What types of data are fed into NLP4RE systems.</p>
+    </div>
+    <div class="funnel">
+      <div class="funnel-item">Requirements Specifications</div>
+      <div class="funnel-item">User Stories</div>
+      <div class="funnel-item">App Reviews</div>
+      <div class="funnel-item">Policy Docs</div>
+      <div class="funnel-item">Code / UML</div>
+    </div>
+    <div style="text-align: center; margin-top: 1.5rem;">
+      <div class="funnel-note">
+        Structured inputs like Code and UML are rarely used. Requirements specifications and user stories dominate.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Tooling ===== -->
+<section id="tooling">
+  <div class="container">
+    <div class="section-header">
+      <h2>The Tooling Landscape: <span class="accent">Prototypes &amp; Basic NLP</span></h2>
+      <p>An overview of the 130 tools developed and their technology stacks.</p>
+    </div>
+    <div class="tooling-layout">
+      <div class="tech-stack">
+        <div class="stack-layer top">
+          <h4>Advanced Semantic NLP</h4>
+          <p>Deep learning, word embeddings, semantic analysis</p>
+        </div>
+        <div class="stack-layer mid">
+          <h4>NLP Tools &amp; Frameworks</h4>
+          <p>Stanford CoreNLP, NLTK, GATE</p>
+        </div>
+        <div class="stack-layer base">
+          <h4>Basic NLP</h4>
+          <p>Tokenization, POS Tagging, Parsing &mdash; the dominant layer</p>
+        </div>
+      </div>
+      <div class="tooling-stats">
+        <div class="big-number">130</div>
+        <div class="big-label">Tools Developed</div>
+        <div class="warning-badge">Only 13% Publicly Available</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Verdict ===== -->
+<section id="verdict">
+  <div class="container">
+    <div class="section-header">
+      <h2>Verdict: A Field in <span class="accent">Rapid but Isolated</span> Growth</h2>
+    </div>
+    <div class="verdict-grid">
+      <div class="verdict-card">
+        <h3>Trend</h3>
+        <div class="verdict-value">Explosive Growth</div>
+        <p class="verdict-detail">Research output has surged dramatically since the early 2000s, with no signs of slowing.</p>
+      </div>
+      <div class="verdict-card">
+        <h3>Output</h3>
+        <div class="verdict-value">Solution Proposals <span class="gt-symbol">&gt;</span> Validation</div>
+        <p class="verdict-detail">The community produces far more proposals than empirically validated results.</p>
+      </div>
+      <div class="verdict-card">
+        <h3>Technology</h3>
+        <div class="verdict-value">Syntax <span class="gt-symbol">&gt;</span> Semantics</div>
+        <p class="verdict-detail">Most tools rely on basic syntactic NLP rather than advanced semantic understanding.</p>
+      </div>
+      <div class="verdict-card">
+        <h3>Community</h3>
+        <div class="verdict-value">Isolated / No Shared Data</div>
+        <p class="verdict-detail">Researchers work in silos with limited collaboration and no shared benchmarks or datasets.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Gaps ===== -->
+<section id="gaps">
+  <div class="container">
+    <div class="section-header">
+      <h2>Critical Gaps in the <span class="accent">Current Landscape</span></h2>
+      <p>Bridging the chasm between academic research and industrial practice.</p>
+    </div>
+    <div class="gaps-bridge">
+      <div class="bridge-side">Academic Research</div>
+      <div class="gap-items">
+        <div class="gap-tag">Industrial Case Studies</div>
+        <div class="gap-tag">Human-Centered Evaluation</div>
+        <div class="gap-tag">Advanced Semantics</div>
+        <div class="gap-tag">Open Datasets</div>
+      </div>
+      <div class="bridge-side" style="background: var(--orange);">Industrial Practice</div>
+    </div>
+    <p class="bridge-chasm">Bridging the Chasm Required</p>
+  </div>
+</section>
+
+<!-- ===== Contributions ===== -->
+<section id="contributions">
+  <div class="container">
+    <div class="section-header">
+      <h2>Contributions: <span class="accent-teal">Mapping the Territory</span></h2>
+    </div>
+    <div class="contrib-list">
+      <div class="contrib-item">
+        <div class="contrib-number">1</div>
+        <p><strong>Largest systematic mapping to date</strong> &mdash; covering 404 studies across 36 years of NLP4RE research.</p>
+      </div>
+      <div class="contrib-item">
+        <div class="contrib-number">2</div>
+        <p><strong>Established a classification framework</strong> &mdash; a structured way to categorize and compare NLP4RE approaches.</p>
+      </div>
+      <div class="contrib-item">
+        <div class="contrib-number">3</div>
+        <p><strong>Identified concrete trends &amp; gaps</strong> &mdash; revealing where the field is heading and what's missing.</p>
+      </div>
+      <div class="contrib-item">
+        <div class="contrib-number">4</div>
+        <p><strong>Foundation for future research</strong> &mdash; providing a roadmap for the next generation of NLP4RE work.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Path Forward ===== -->
+<section id="path">
+  <div class="container">
+    <div class="section-header">
+      <h2>The Path Toward <span class="accent">Empirical Maturity</span></h2>
+    </div>
+    <div class="path-arrows">
+      <div class="path-step s1">Solution Proposal</div>
+      <div class="path-step s2">Lab Experiment</div>
+      <div class="path-step s3">Industrial Application</div>
+    </div>
+    <div class="path-quote">
+      The opportunity exists to transform Requirements Engineering through rigorous, semantic, and human-centric AI.
+    </div>
+  </div>
+</section>
+
+<!-- ===== Closing ===== -->
+<section id="closing">
+  <div class="container">
+    <h2>
+      <span class="closing-accent">404 Studies.</span>
+      <span>36 Years.</span>
+      <span class="closing-accent">One Framework.</span>
+    </h2>
+    <p class="closing-cite">
+      Natural Language Processing for Requirements Engineering:<br>
+      A Systematic Mapping Study (Zhao et al., 2021)
+    </p>
+  </div>
+</section>
+
+<!-- ===== Footer ===== -->
+<footer>
+  <p>Based on: Liping Zhao et al., &ldquo;Natural Language Processing for Requirements Engineering: A Systematic Mapping Study,&rdquo; <em>ACM Computing Surveys</em>, 2021.</p>
+</footer>
+
+</body>
+</html>
